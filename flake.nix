@@ -8,7 +8,7 @@
 
   outputs = { self, nixpkgs, ... }@inputs: {
     # REPLACE 'your-hostname' with the output of the 'hostname' command
-    nixosConfigurations.your-hostname = nixpkgs.lib.nixosSystem {
+    nixosConfigurations.apon-nix = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = { inherit inputs; };
       modules = [ ./configuration.nix ];
