@@ -16,6 +16,7 @@
 
   # Configure network connections interactively with nmcli or nmtui.
   networking.hostName = "apon-nix"; # Define your hostname.
+  networking.hostId = "d7dac151";   # Paste your 8-digit machine-id code here
   networking.networkmanager.enable = true;
 
   # Set your time zone.
