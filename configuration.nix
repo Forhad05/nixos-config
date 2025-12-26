@@ -76,10 +76,26 @@
     ];
   };
 
+  # 1. Enable the Zsh Program
+  programs.zsh = {
+    enable = true;
+    autosuggestions.enable = true;
+    syntaxHighlighting.enable = true;
+
+    ohMyZsh = {
+      enable = true;
+      plugins = [ "git" "sudo" ]; # "sudo" plugin: press ESC twice to add sudo
+      theme = "robbyrussell";     # Shows branch name and status icons
+    };
+  };
+
   programs.steam.enable = true;
   programs.firefox.enable = true;
 
   nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.permittedInsecurePackages = [
+    "ventoy-1.1.07"
+  ];
 
   # Performance: zRam (Compressed RAM swap)
   zramSwap.enable = true;
@@ -90,6 +106,8 @@
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     wget
     htop
+    parted
+    e2fsprogs
     btop                        # Adding this too, you'll love the UI!
     nvtopPackages.nvidia        # Your GPU monitor
   ];
@@ -134,6 +152,7 @@
   ];
 
   nix.settings.auto-optimise-store = true;
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # Copy the NixOS configuration file and link it from the resulting system
   # (/run/current-system/configuration.nix). This is useful in case you

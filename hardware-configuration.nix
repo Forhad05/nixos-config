@@ -28,7 +28,15 @@
       fsType = "zfs";
     };
 
-  swapDevices = [ ];
+  fileSystems."/boot" =
+    { device = "/dev/disk/by-uuid/B830-FFF1";
+      fsType = "vfat";
+      options = [ "fmask=0077" "dmask=0077" ];
+    };
+
+  swapDevices =
+    [ { device = "/dev/disk/by-uuid/eb00a6a0-7e18-4d67-98a3-de9de37c9e1e"; }
+    ];
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
