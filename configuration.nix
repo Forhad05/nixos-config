@@ -5,10 +5,12 @@
 { config, lib, pkgs, ... }:
 
 {
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-    ];
+  # Your main imports at the top
+  imports = [ 
+    ./hardware-configuration.nix 
+    ./secrets.nix
+    ./apps.nix 
+  ];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -16,7 +18,6 @@
 
   # Configure network connections interactively with nmcli or nmtui.
   networking.hostName = "apon-nix"; # Define your hostname.
-  networking.hostId = "d7dac151";   # Paste your 8-digit machine-id code here
   networking.networkmanager.enable = true;
 
   # Set your time zone.
@@ -67,13 +68,8 @@
     isNormalUser = true;
     description = "Apon";
     extraGroups = [ "networkmanager" "wheel" "video" "audio" ];
-    packages = with pkgs; [
-      firefox
-      vscode
-      git
-      fastfetch
-      btop
-    ];
+
+    # No 'packages' line here! It's all handled by apps.nix now.
   };
 
   # 1. Enable the Zsh Program
