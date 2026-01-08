@@ -3,12 +3,13 @@
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
 { config, lib, pkgs, ... }:
-
+let
+  secrets = import ./secrets.nix;
+in
 {
   # Your main imports at the top
   imports = [ 
-    ./hardware-configuration.nix 
-    ./secrets.nix
+    ./hardware-configuration.nix
     ./apps.nix 
   ];
 
@@ -18,13 +19,14 @@
 
   # Configure network connections interactively with nmcli or nmtui.
   networking.hostName = "apon-nix"; # Define your hostname.
+  networking.hostId = secrets.hostId;
   networking.networkmanager.enable = true;
 
   # Set your time zone.
   time.timeZone = "Asia/Dhaka";
 
   # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
+  # networking.proxy.default = "socks5h://127.0.0.1:4000";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
   # Select internationalisation properties.
@@ -40,8 +42,7 @@
 
   # Enable the KDE Plasma Desktop Environment.
   services.displayManager.sddm.enable = true;
-  services.desktopManager.plasma6.enable = true;
-  
+  services.desktopManager.plasma6.enable = true;  
 
   # Configure keymap in X11
   # services.xserver.xkb.layout = "us";
@@ -67,9 +68,14 @@
   users.users.apon = {
     isNormalUser = true;
     description = "Apon";
-    extraGroups = [ "networkmanager" "wheel" "video" "audio" ];
+    extraGroups = [ "networkmanager" "wheel" "video" "audio" "input" "uinput" ];
 
     # No 'packages' line here! It's all handled by apps.nix now.
+  };
+
+  environment.shellAliases = {
+    check-shield = "curl https://ifconfig.me && systemctl status shopify-bypass privoxy";
+    rebuild = "sudo nixos-rebuild switch";
   };
 
   # 1. Enable the Zsh Program
@@ -106,6 +112,9 @@
     e2fsprogs
     btop                        # Adding this too, you'll love the UI!
     nvtopPackages.nvidia        # Your GPU monitor
+    openssh
+    proxychains-ng
+    mtr
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -149,6 +158,45 @@
 
   nix.settings.auto-optimise-store = true;
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
+  # 1. Define the "Shield" Port for Shopify
+  environment.variables = {
+    # This fixes the Shopify CLI specifically
+    SHOPIFY_HTTP_PROXY = "http://127.0.0.1:8118";
+    SHOPIFY_HTTPS_PROXY = "http://127.0.0.1:8118";
+
+    # This fixes curl, git, and everything else
+    all_proxy = "socks5h://127.0.0.1:4000";
+    ALL_PROXY = "socks5h://127.0.0.1:4000";
+  };
+
+  # 2. Create the Automatic Tunnel Service
+  systemd.services.shopify-bypass = {
+    description = "Bypass ISP filtering for Shopify CLI";
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
+    wantedBy = [ "multi-user.target" ];
+
+    serviceConfig = {
+      # 1. This tells NixOS to run this as YOU (the person who owns the key)
+      User = "apon"; 
+      
+      # 2. This points directly to your "ID Card" file
+      # Replace the IP with your actual external IP
+      ExecStart = "${pkgs.openssh}/bin/ssh -NT -D 4000 -o StrictHostKeyChecking=accept-new -i ${secrets.sshKeyPath} ${secrets.sshUser}@${secrets.vmIp}";
+      
+      Restart = "always";
+      RestartSec = 5;
+    };
+  };
+
+  services.privoxy = {
+    enable = true;
+    settings = {
+      forward-socks5 = "/ 127.0.0.1:4000 .";
+      listen-address = "127.0.0.1:8118";
+    };
+  };
 
   # Copy the NixOS configuration file and link it from the resulting system
   # (/run/current-system/configuration.nix). This is useful in case you
