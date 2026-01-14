@@ -1,18 +1,15 @@
 { pkgs, ... }: {
   # 1. User Packages
   users.users.apon.packages = with pkgs; [
-    # General Tools
+    # General
     fastfetch
-    btop
     firefox
-
-    # Development tools
-    git
-    git-lfs         # Often required for Shopify GitHub integrations
-    watchman        # Improves file-watching speed for Remix dev servers
     vscode
 
-    # Web & Shopify Development
+    # Development
+    git
+    git-lfs
+    watchman
     nodejs_24
     nodePackages.npm
     shopify-cli

@@ -70,7 +70,7 @@ in
     description = "Apon";
     extraGroups = [ "networkmanager" "wheel" "video" "audio" "input" "uinput" ];
 
-    # No 'packages' line here! It's all handled by apps.nix now.
+    openssh.authorizedKeys.keys = [ secrets.sshKey ];
   };
 
   environment.shellAliases = {
@@ -112,9 +112,14 @@ in
     e2fsprogs
     btop                        # Adding this too, you'll love the UI!
     nvtopPackages.nvidia        # Your GPU monitor
+    plasma-panel-colorizer
     openssh
     proxychains-ng
     mtr
+    nmap
+    wineWow64Packages.full
+    winetricks
+    vulkan-loader
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -129,9 +134,18 @@ in
 
   # Enable the OpenSSH daemon.
   # services.openssh.enable = true;
+  services.openssh = {
+    enable = true;
+    ports = [ 22 443 ];
+    settings = {
+      PasswordAuthentication = false;
+      KbdInteractiveAuthentication = false;
+      PermitRootLogin = "no";
+    };
+  };
 
   # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
+  networking.firewall.allowedTCPPorts = [ 22 443 ];
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
@@ -183,7 +197,7 @@ in
       
       # 2. This points directly to your "ID Card" file
       # Replace the IP with your actual external IP
-      ExecStart = "${pkgs.openssh}/bin/ssh -NT -D 4000 -o StrictHostKeyChecking=accept-new -i ${secrets.sshKeyPath} ${secrets.sshUser}@${secrets.vmIp}";
+      ExecStart = "${pkgs.openssh}/bin/ssh -p 443 -NT -D 4000 -o StrictHostKeyChecking=accept-new -i ${secrets.sshKeyPath} ${secrets.sshUser}@${secrets.vmIp}";
       
       Restart = "always";
       RestartSec = 5;
