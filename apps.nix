@@ -6,6 +6,9 @@
     firefox
     vscode
 
+    # sharing
+    qbittorrent
+
     # Development
     git
     git-lfs
@@ -16,12 +19,4 @@
     shopify-themekit
     ruby
   ];
-
-  # 2. System Network Settings
-  networking.firewall = {
-    enable = true;
-    # 9292 is the standard Shopify CLI port
-    # 5173 is the default Vite port
-    allowedTCPPorts = [ 9292 5173 3000 ];
-  };
 }

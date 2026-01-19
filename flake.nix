@@ -3,7 +3,7 @@
 
   inputs = {
     # We'll use the unstable branch for the latest VS Code and drivers
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
   };
 
   outputs = { self, nixpkgs, ... }@inputs: {
